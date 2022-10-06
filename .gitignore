@@ -1,0 +1,8 @@
+# Ignore
+.*
+env
+
+__pycache__/
+
+# Don't ignore
+!.gitignore
