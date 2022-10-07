@@ -5,18 +5,18 @@ from sagemaker import (
 )
 
 
-metric_definitions = [
+METRIC_DEFINITIONS = [
     {
         "Name": "val_loss",
-        "Regex": r"\d+/\d+ - \d+s - loss: \d+\.\d+ - accuracy: \d+\.\d+ - val_loss: (\d+\.\d+) - val_accuracy: \d+\.\d+ - \d+s/epoch - \d+ms/step"
+        "Regex": r"\d+\/\d+ - \d+m?s - loss: \d+\.\d+ - accuracy: \d+\.\d+ - val_loss: (\d+\.\d+) - val_accuracy: \d+\.\d+ - \d+m?s\/epoch - \d+m?s\/step"
     },
     {
         "Name": "val_accuracy",
-        "Regex": r"\d+/\d+ - \d+s - loss: \d+\.\d+ - accuracy: \d+\.\d+ - val_loss: \d+\.\d+ - val_accuracy: (\d+\.\d+) - \d+s/epoch - \d+ms/step"
+        "Regex": r"\d+\/\d+ - \d+m?s - loss: \d+\.\d+ - accuracy: \d+\.\d+ - val_loss: \d+\.\d+ - val_accuracy: (\d+\.\d+) - \d+m?s\/epoch - \d+m?s\/step"
     },
     {
         "Name": "best_val_accuracy",
-        "Regex": r"\d+/\d+ - \d+s - loss: \d+\.\d+ - accuracy: (\d\.\d+) - \d+s/epoch - \d+ms/step"
+        "Regex": r"\d+\/\d+ - \d+m?s - loss: \d+\.\d+ - accuracy: (\d+\.\d+) - \d+m?s\/epoch - \d+m?s\/step"
     },
 ]
 
@@ -71,7 +71,7 @@ class BaseEstimator:
             max_run=max_run,
             hyperparameters=hyperparameters,
             enable_sagemaker_metrics=True,
-            metric_definitions=metric_definitions,
+            metric_definitions=METRIC_DEFINITIONS,
             output_path=output_path,
             base_job_name=base_job_name,
         )
@@ -88,7 +88,7 @@ class BaseHyperparameterTuner:
             hyperparameter_ranges=hyperparameter_ranges,
             max_jobs=max_jobs,
             max_parallel_jobs=max_parallel_jobs,
-            metric_definitions=metric_definitions,
+            metric_definitions=METRIC_DEFINITIONS,
             objective_metric_name="best_val_accuracy",
             objective_type="Maximize",
             early_stopping_type="Auto",
