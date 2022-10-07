@@ -1,4 +1,5 @@
 import json
+from io import BytesIO
 from sagemaker.model import Model
 from sagemaker.predictor import Predictor
 from sagemaker.utils import name_from_base
@@ -68,8 +69,23 @@ class BasePredictor:
         self._deployed = True
         
     
-    def predict(self, data, args=None):
-        """ Predict data using predictive model. Implementation changes depending on model. """
+    def predict(self, image, args=None):
+        """ Predict data using predictive model """
+        output = BytesIO()
+        image.save(output, format='JPEG')
+        image_binary = output.getvalue()
+    
+        if not args:
+            args = {
+                "ContentType": "application/x-image",
+                "Accept": "application/json;verbose"
+            }
+            
+        query_response = self._model_predictor.predict(image_binary, args)
+        return self.parse_query_response(query_response)
+    
+    
+    def parse_query_response(self, query_response):
         pass
         
     
@@ -85,14 +101,7 @@ class BasePredictor:
         
         
 class ObjectDetectionPredictor(BasePredictor):
-    def predict(self, data, args=None):
-        if not args:
-            args = {
-                "ContentType": "application/x-image",
-                "Accept": "application/json;verbose"
-            }
-            
-        query_response = self._model_predictor.predict(data, args)
+    def parse_query_response(self, query_response):
         model_predictions = json.loads(query_response)
         normalized_boxes, classes, scores, labels = (
             model_predictions["normalized_boxes"],
@@ -106,14 +115,7 @@ class ObjectDetectionPredictor(BasePredictor):
     
 
 class ImageClassificationPredictor(BasePredictor):
-    def predict(self, data, args=None):
-        if not args:
-            args = {
-                "ContentType": "application/x-image",
-                "Accept": "application/json;verbose",
-            }
-            
-        query_response = self._model_predictor.predict(data, args)
+    def parse_query_response(self, query_response):
         model_predictions = json.loads(query_response)
         labels, probabilities = model_predictions["labels"], model_predictions["probabilities"]
         
@@ -123,5 +125,4 @@ class ImageClassificationPredictor(BasePredictor):
         )
         labels = [labels[idx] for idx in sorted_idx]
         probabilities = [probabilities[idx] for idx in sorted_idx]
-        
         return labels, probabilities
