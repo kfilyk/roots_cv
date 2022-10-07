@@ -1,5 +1,6 @@
 from sagemaker.estimator import Estimator
 from sagemaker.utils import name_from_base
+from sagemaker.tuner import HyperparameterTuner
 from sagemaker import (
     get_execution_role, image_uris, model_uris, script_uris
 )
@@ -92,5 +93,5 @@ class BaseHyperparameterTuner:
             objective_metric_name="best_val_accuracy",
             objective_type="Maximize",
             early_stopping_type="Auto",
-            base_tuning_job_name=base_job_namee,
+            base_tuning_job_name=base_job_name,
         )
