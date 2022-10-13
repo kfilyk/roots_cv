@@ -20,17 +20,20 @@ class S3Bucket:
         file_stream = response["Body"]
         if response["ContentType"] == "image/jpeg":
             return Image.open(file_stream).convert("RGB")
-        return file_stream
+        return file_stream.read().decode('utf-8')
     
     
     def __setitem__(self, key, value):
         obj = self.bucket.Object(key)
-        try:
+        value_type = type(value)
+        if value_type == str:
+            obj.put(Body=bytes(value.encode('UTF-8')))
+        elif value_type == Image.Image:
             file_stream = BytesIO()
             value.save(file_stream, format="JPEG")
             obj.put(Body=file_stream.getvalue())
-        except:
-            raise ValueError(f"__setitem__ only accepts a value of type PIL.Image.Image. It was given {type(value)}.")
+        else:
+            raise ValueError(f"__setitem__ only accepts a value of type str and PIL.Image.Image. It was given {type(value)}.")
             
             
     def filter(self, prefix):
