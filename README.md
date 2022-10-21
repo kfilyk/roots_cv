@@ -15,11 +15,14 @@ Run `scripts/data_processing/download_GBIF_images.ipynb` to download images from
 ### Crop Plant Images
 Run `scripts/data_processing/crop_plant_images.ipynb` to crop plant images from images.
 
-### Split Object Detection Data Labelling Output Manifest
-Run `scripts/data_processing/split_object_detection_output_manifest.ipynb` to manipulate the file `output.manifest` from SageMaker's Ground Truth object detection data job labelling. It will split records containing bounding boxes for both plants and leaves into two different files, e.i. one file `plant_output.manifest` will contain bounding boxes for plants and the other file `leaf_output.manifest` will contain bounding boxes for leaves.
-
 ### Clean S3 Image Directory
 Run `scripts/data_processing/clean_s3_image_directory.ipynb` to convert all PNG, WEBP, and GIF files to JPEG images within a specified S3 path. Furthermore, it deletes any duplicate images.
+
+### Split Output Manifest
+Run `scripts/data_processing/split_output_manifest.ipynb` to manipulate the file `output.manifest` from SageMaker's Ground Truth object detection data job labelling. It will split records containing bounding boxes for plants, leaves, flowers, and fruits into multiple files for each present category.
+
+### Output Manifest to Annotations JSON
+Run `scripts/data_processing/output_manifest_to_annotations_json.ipynb` to convert `output.manifest` from SageMaker's Ground Truth object detection data job labelling to `annotations.json` format to be used to train object detection models.
 
 
 ## 2. Training Classification Model
