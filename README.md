@@ -12,9 +12,6 @@ The environment variables inside `env` will be used in the pipeline's jupyter no
 ### Download GBIF Images
 Run `scripts/data_processing/download_GBIF_images.ipynb` to download images from GBIF. The metadata files were downloaded from https://www.gbif.org/occurrence/search.
 
-### Crop Plant Images
-Run `scripts/data_processing/crop_plant_images.ipynb` to crop plant images from images.
-
 ### Clean S3 Image Directory
 Run `scripts/data_processing/clean_s3_image_directory.ipynb` to convert all PNG, WEBP, and GIF files to JPEG images within a specified S3 path. Furthermore, it deletes any duplicate images.
 
