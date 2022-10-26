@@ -18,9 +18,12 @@ class S3Bucket:
         obj = self.bucket.Object(key)
         response = obj.get()
         file_stream = response["Body"]
-        if response["ContentType"].startswith("image/"):
+        content_type = response["ContentType"]
+        if content_type.startswith("image/"):
             return Image.open(file_stream).convert("RGB")
-        return file_stream.read().decode('utf-8')
+        if content_type == "binary/octet-stream":
+            return file_stream.read().decode('utf-8')
+        return file_stream
     
     
     def __setitem__(self, key, value):
