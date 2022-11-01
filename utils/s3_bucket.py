@@ -22,7 +22,7 @@ class S3Bucket:
         content_type = response["ContentType"]
         if content_type.startswith("image/"):
             return Image.open(file_stream).convert("RGB")
-        if content_type == "binary/octet-stream":
+        if content_type.endswith("/octet-stream"):
             return file_stream.read().decode('utf-8')
         return file_stream
     
