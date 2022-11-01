@@ -8,11 +8,12 @@ class S3Bucket:
         self.s3 = boto3.resource("s3", region_name)
         self.bucket = self.s3.Bucket(bucket_name)
         
+    def __len__(self):
+        return sum(1 for _ in self.bucket.objects.all())
     
     def __iter__(self):
         for obj in self.bucket.objects.all():
-            yield obj
-            
+            yield obj  
     
     def __getitem__(self, key):
         obj = self.bucket.Object(key)
@@ -25,7 +26,6 @@ class S3Bucket:
             return file_stream.read().decode('utf-8')
         return file_stream
     
-    
     def __setitem__(self, key, value):
         obj = self.bucket.Object(key)
         value_type = type(value)
@@ -37,11 +37,9 @@ class S3Bucket:
             obj.put(Body=file_stream.getvalue(), ContentType="image/jpeg")
         else:
             raise ValueError(f"__setitem__ only accepts a value of type str and PIL.Image.Image. It was given {type(value)}.")
-            
-            
+    
     def filter(self, prefix):
-        return self.bucket.objects.filter(Prefix=prefix).all()
-        
+        return S3Collection(self.bucket, prefix)
     
     def delete(self, **kwargs):
         if len(kwargs) != 1:
@@ -53,4 +51,15 @@ class S3Bucket:
             self.bucket.objects.filter(Prefix=kwargs["prefix"]).delete()
         else:
             raise ValueError(f'delete only accepts "key" or "prefix" keyword arguments. It was given {keyword}.')
+
+
+class S3Collection:
+    def __init__(self, bucket, prefix):
+        self.collection = bucket.objects.filter(Prefix=prefix)
         
+    def __len__(self):
+        return sum(1 for _ in self.collection)
+    
+    def __iter__(self):
+        for obj in self.collection:
+            yield obj  
