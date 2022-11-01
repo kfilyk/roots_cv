@@ -37,10 +37,8 @@ IC_METRIC_DEFINITIONS = [
 class BaseEstimator:
     def __init__(
         self, model_id, model_version, hyperparameters, instance_type, instance_count,
-        max_run, output_path, model_uri=None, base_job_name=None
-    ):
-        aws_role = get_execution_role()
-        
+        max_run, output_path, model_uri=None, base_job_name=None, metric_definitions=None
+    ):        
         # Retrieve the docker image
         image_uri = image_uris.retrieve(
             region=None,
@@ -72,7 +70,23 @@ class BaseEstimator:
         
         # required to properly save model to s3 bucket
         hyperparameters["model_dir"] = "/opt/ml/model"
-        self._estimator = None
+        
+        # Create SageMaker Estimator instance
+        self._estimator = Estimator(
+            role=get_execution_role(),
+            image_uri=image_uri,
+            source_dir=source_uri,
+            model_uri=model_uri,
+            entry_point="transfer_learning.py",
+            instance_count=instance_count,
+            instance_type=instance_type,
+            max_run=max_run,
+            hyperparameters=hyperparameters,
+            enable_sagemaker_metrics=True,
+            metric_definitions=metric_definitions,
+            output_path=output_path,
+            base_job_name=base_job_name,
+        )
 
         
     def fit(self, *args, **kwargs):
@@ -82,54 +96,28 @@ class BaseEstimator:
 class ObjectDetectionEstimator(BaseEstimator):
     def __init__(
         self, model_id, model_version, hyperparameters, instance_type, instance_count,
-        max_run, output_path, model_uri=None, base_job_name=None
+        max_run, output_path, model_uri=None, base_job_name=None, metric_definitions=None
     ):
+        if not metric_definitions:
+            metric_definitions = OD_METRIC_DEFINITIONS
+            
         super().__init__(
             model_id, model_version, hyperparameters, instance_type, instance_count,
-            max_run, output_path, model_uri, base_job_name
-        )
-        # Create SageMaker Estimator instance
-        self._estimator = Estimator(
-            role=aws_role,
-            image_uri=image_uri,
-            source_dir=source_uri,
-            model_uri=model_uri,
-            entry_point="transfer_learning.py",
-            instance_count=instance_count,
-            instance_type=instance_type,
-            max_run=max_run,
-            hyperparameters=hyperparameters,
-            enable_sagemaker_metrics=True,
-            metric_definitions=OD_METRIC_DEFINITIONS,
-            output_path=output_path,
-            base_job_name=base_job_name,
+            max_run, output_path, model_uri, base_job_name, metric_definitions
         )
         
 
 class ImageClassificationEstimator(BaseEstimator):
     def __init__(
         self, model_id, model_version, hyperparameters, instance_type, instance_count,
-        max_run, output_path, model_uri=None, base_job_name=None
+        max_run, output_path, model_uri=None, base_job_name=None, metric_definitions=None
     ):
+        if not metric_definitions:
+            metric_definitions = IC_METRIC_DEFINITIONS
+            
         super().__init__(
             model_id, model_version, hyperparameters, instance_type, instance_count,
-            max_run, output_path, model_uri, base_job_name
-        )
-        # Create SageMaker Estimator instance
-        self._estimator = Estimator(
-            role=aws_role,
-            image_uri=image_uri,
-            source_dir=source_uri,
-            model_uri=model_uri,
-            entry_point="transfer_learning.py",
-            instance_count=instance_count,
-            instance_type=instance_type,
-            max_run=max_run,
-            hyperparameters=hyperparameters,
-            enable_sagemaker_metrics=True,
-            metric_definitions=IC_METRIC_DEFINITIONS,
-            output_path=output_path,
-            base_job_name=base_job_name,
+            max_run, output_path, model_uri, base_job_name, metric_definitions
         )
         
 
@@ -169,7 +157,7 @@ class ObjectDetectionHPTuner(BaseHPTuner):
             max_jobs=max_jobs,
             max_parallel_jobs=max_parallel_jobs,
             metric_definitions=OD_METRIC_DEFINITIONS,
-            objective_metric_name="val_cross_entropy",
+            objective_metric_name="val_smooth_l1",
             objective_type="Minimize",
             early_stopping_type="Auto",
             base_tuning_job_name=base_job_name,
