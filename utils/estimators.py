@@ -8,12 +8,16 @@ from sagemaker import (
 
 OD_METRIC_DEFINITIONS = [
     {
-        "Name": "val_cross_entropy",
-        "Regex": r"Val_CrossEntropy=(\d+\.\d+), Val_SmoothL1=\d+\.\d+"
+        "Name": "loss",
+        "Regex": r"loss=(\d+\.\d+)"
     },
     {
-        "Name": "val_smooth_l1",
-        "Regex": r"Val_CrossEntropy=\d+\.\d+, Val_SmoothL1=(\d+\.\d+)"
+        "Name": "val_localization",
+        "Regex": r"Val_localization=(\d+\.\d+), Val_classification=\d+\.\d+"
+    },
+    {
+        "Name": "val_classification",
+        "Regex": r"Val_localization=\d+\.\d+, Val_classification=(\d+\.\d+)"
     },
 ]
 
@@ -157,7 +161,7 @@ class ObjectDetectionHPTuner(BaseHPTuner):
             max_jobs=max_jobs,
             max_parallel_jobs=max_parallel_jobs,
             metric_definitions=OD_METRIC_DEFINITIONS,
-            objective_metric_name="val_smooth_l1",
+            objective_metric_name="val_localization",
             objective_type="Minimize",
             early_stopping_type="Auto",
             base_tuning_job_name=base_job_name,
